@@ -32,7 +32,7 @@ public class User {
 		return new User(id, firstName, lastName);
 	}
 
-	public void setAge(int age) {
+	public void setAge(final int age) {
 		checkArgument(age > 0, "Age less than 0");
 		this.age = age;
 		log.info("Age of {} for user {} was set", this.age, this.id);

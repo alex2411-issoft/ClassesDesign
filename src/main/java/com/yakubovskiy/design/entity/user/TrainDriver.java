@@ -5,6 +5,8 @@ import lombok.NonNull;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.UUID;
+
 import static com.google.common.base.Preconditions.checkArgument;
 
 @Slf4j
@@ -12,16 +14,19 @@ import static com.google.common.base.Preconditions.checkArgument;
 @EqualsAndHashCode
 public class TrainDriver {
 	private static final int AGE_TO_DRIVE = 18;
+	private final UUID id;
 	private final User user;
 
-	private TrainDriver(User user) {
+	private TrainDriver(UUID id, User user) {
+		this.id = id;
 		this.user = user;
-		log.info("Train driver {} was created", user);
+		log.info("Train driver {} was created", id);
 	}
 
 	public static TrainDriver of(@NonNull final User user, final boolean hasLicense) {
 		checkUser(user, hasLicense);
-		return new TrainDriver(user);
+		UUID id = UUID.randomUUID();
+		return new TrainDriver(id, user);
 	}
 
 	private static void checkUser(final User user, final boolean hasLicense) {
