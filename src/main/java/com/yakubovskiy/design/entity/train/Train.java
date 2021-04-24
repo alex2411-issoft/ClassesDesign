@@ -2,82 +2,115 @@ package com.yakubovskiy.design.entity.train;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.ToString;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.UUID;
 
 @Slf4j
-@ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(of = "number")
 @Getter
-public class Train implements Iterable<Train> {
+public class Train {
 	private final UUID number;
-	private Train nextTrain;
+	private Node<Carriage> head;
 
-	public Train(UUID number) {
-		log.info("Creating train {}", number);
+	private Train(UUID number, Locomotive locomotive) {
 		this.number = number;
-		List<Objects> list = new ArrayList<>();
-		list.stream()
-				.sorted()
-				.forEach(x -> x.getClass());
-		if (1 > 0) {
-			System.out.println();
-			if (1 > 0) {
+		this.head = new Node<>(locomotive);
+		log.info("Train {} was created", number);
+	}
 
-				System.out.println("wtf");
-			}
+	public static Train of(@NonNull final Locomotive locomotive) {
+		UUID number = UUID.randomUUID();
+		return new Train(number, locomotive);
+	}
+
+	public void setNextCarriage(@NonNull final Carriage carriage) {
+		if (head == null) {
+			head = new Node<>(carriage);
+			log.info("Head carriage was set for train {}", this.number);
+			return;
 		}
-		log.info("Created train {}", number);
+
+		Node<Carriage> currentCarriage = head;
+		while (currentCarriage.next != null) {
+			currentCarriage = currentCarriage.next;
+		}
+
+		currentCarriage.next = new Node<>(carriage);
+		log.info("Next carriage was set for train {}", this.number);
 	}
 
-	public void setNextTrain(Train train) {
-		log.info("Setting next train {} for train {}", train.getNumber(), this.number);
-		this.nextTrain = train;
-		log.info("Set next train {} for train {}", train.getNumber(), this.number);
+	public int getTrainSize() {
+		if(head==null) {
+			return 0;
+		}
+
+		int result = 1;
+		Node<Carriage> currentCarriage = head;
+		while (currentCarriage.next != null) {
+			++result;
+			currentCarriage = currentCarriage.next;
+		}
+
+		return result;
 	}
 
-	public void removeNextTrain() {
-		log.info("Removing next train for train {}", this.number);
-		this.nextTrain = null;
-		log.info("Removed next train for train {}", this.number);
+	public void removeCarriage(@NonNull final Carriage carriage) {
+		if (head == null) {
+			log.info("There are no carriages on the train");
+			return;
+		}
+
+		if (head.value == carriage) {
+			head = null;
+			log.info("Head carriage {} of train {} was removed", carriage.getId(), this.getNumber());
+			return;
+		}
+
+		Node<Carriage> currentCarriage = head;
+		while (currentCarriage.next != null) {
+			if (currentCarriage.next.value == carriage) {
+				currentCarriage.next = null;
+				log.info("Carriage {} was removed from train {}", carriage.getId(), this.getNumber());
+				return;
+			}
+			currentCarriage = currentCarriage.next;
+		}
+		log.info("Next carriage was removed from train {}", this.number);
 	}
 
-	public boolean hasNextTrain() {
-		return nextTrain != null;
+	public void removeAllCarriages() {
+		head = null;
 	}
+
+	public boolean hasCarriage() {
+		return head != null;
+	}
+
 
 	@Override
-	public Iterator<Train> iterator() {
-		return new TrainIterator();
+	public String toString() {
+		return "Train{" +
+				"number=" + number +
+				", head=" + head +
+				" }'";
 	}
 
-	private class TrainIterator implements Iterator<Train> {
+	private static class Node<Carriage> {
+		private final Carriage value;
+		private Node<Carriage> next;
 
-		private Train nextTrain;
-
-		public TrainIterator() {
-			this.nextTrain = Train.this;
+		public Node(Carriage value) {
+			this.value = value;
 		}
 
 		@Override
-		public boolean hasNext() {
-			return nextTrain != null;
-		}
-
-		@Override
-		public Train next() {
-			Train result = nextTrain;
-
-			if (nextTrain == null) throw new NoSuchElementException();
-			if (nextTrain.hasNextTrain()) {
-				nextTrain = nextTrain.getNextTrain();
-			} else {
-				nextTrain = null;
-			}
-
-			return result;
+		public String toString() {
+			return "{" +
+					"value=" + value +
+					", next=" + next +
+					'}';
 		}
 	}
 }

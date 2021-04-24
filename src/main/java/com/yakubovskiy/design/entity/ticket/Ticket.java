@@ -28,7 +28,7 @@ public class Ticket {
 	}
 
 	public static Ticket of(@NonNull final String from, @NonNull final String to) {
-		checkArgument(!from.equalsIgnoreCase(to), "\"from\" is equal \"to\"");
+		checkArgument(!from.equalsIgnoreCase(to), "Incorrect route");
 		UUID id = UUID.randomUUID();
 		return new Ticket(id, from, to);
 	}
